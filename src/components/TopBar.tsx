@@ -58,8 +58,8 @@ export default function TopBar({
       </div>
 
       {showConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-          <div className="bg-gray-800 rounded-xl p-6 shadow-2xl text-center max-w-xs mx-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-top bg-black/60">
+          <div className="bg-gray-800 rounded-xl p-6 shadow-2xl text-center max-w-xs mx-4  -rotate-90">
             <p className="text-lg font-semibold text-white mb-4">
               Reset all life totals to 40?
             </p>

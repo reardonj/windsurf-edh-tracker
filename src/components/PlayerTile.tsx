@@ -111,8 +111,8 @@ export default function PlayerTile({ player, isSelected, rotation, onIncrement }
             style={{ animation: 'fade-in 150ms ease-out forwards' }}
           />
           <div
-            className="absolute inset-0 rounded-2xl bg-white/30 pointer-events-none z-20"
-            style={{ animation: 'pulse-3x 1500ms ease-in-out 2 forwards' }}
+            className="absolute inset-0 rounded-2xl bg-white/50 pointer-events-none z-20"
+            style={{ animation: 'pulse-3x 1200ms ease-in-out 2 forwards' }}
           />
         </>
       )}

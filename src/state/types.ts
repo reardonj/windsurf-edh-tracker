@@ -18,8 +18,8 @@ export const MAX_PLAYERS = 6;
 export const PLAYER_COLORS = [
   '#e74c3c', // red
   '#3498db', // blue
-  '#2ecc71', // green
   '#f39c12', // amber
-  '#9b59b6', // purple
   '#1abc9c', // teal
+  '#2ecc71', // green
+  '#9b59b6', // purple
 ];

@@ -8,6 +8,7 @@ interface TopBarProps {
   onRemovePlayer: () => void;
   onRandomPlayer: () => void;
   onReset: () => void;
+  commanderDamageMode: boolean;
 }
 
 export default function TopBar({
@@ -16,6 +17,7 @@ export default function TopBar({
   onRemovePlayer,
   onRandomPlayer,
   onReset,
+  commanderDamageMode,
 }: TopBarProps) {
   const [showConfirm, setShowConfirm] = useState(false);
 
@@ -28,7 +30,7 @@ export default function TopBar({
         <button
           className={`${btnClass} bg-gray-700 hover:bg-gray-600 text-white`}
           onClick={onAddPlayer}
-          disabled={playerCount >= MAX_PLAYERS}
+          disabled={commanderDamageMode || playerCount >= MAX_PLAYERS}
           aria-label="Add player"
         >
           <span className="-rotate-90"><UserPlus size={22} /></span>
@@ -36,7 +38,7 @@ export default function TopBar({
         <button
           className={`${btnClass} bg-gray-700 hover:bg-gray-600 text-white`}
           onClick={onRemovePlayer}
-          disabled={playerCount <= MIN_PLAYERS}
+          disabled={commanderDamageMode || playerCount <= MIN_PLAYERS}
           aria-label="Remove player"
         >
           <span className="-rotate-90"><UserMinus size={22} /></span>
@@ -44,6 +46,7 @@ export default function TopBar({
         <button
           className={`${btnClass} bg-sky-600 hover:bg-sky-500 text-white`}
           onClick={onRandomPlayer}
+          disabled={commanderDamageMode}
           aria-label="Random player"
         >
           <span className="-rotate-90"><Dices size={22} /></span>
@@ -51,6 +54,7 @@ export default function TopBar({
         <button
           className={`${btnClass} bg-rose-600 hover:bg-rose-500 text-white`}
           onClick={() => setShowConfirm(true)}
+          disabled={commanderDamageMode}
           aria-label="Reset game"
         >
           <span className="-rotate-90"><RotateCcw size={22} /></span>

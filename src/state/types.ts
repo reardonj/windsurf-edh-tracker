@@ -2,6 +2,7 @@ export interface Player {
   id: string;
   life: number;
   colorIndex: number;
+  commanderDamage: Record<string, number>;
 }
 
 export interface GameState {
@@ -9,6 +10,7 @@ export interface GameState {
   players: Player[];
   visibleCount: number;
   selectedPlayerId: string | null;
+  commanderDamageSourceId: string | null;
 }
 
 export const STARTING_LIFE = 40;

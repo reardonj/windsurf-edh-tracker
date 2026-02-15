@@ -18,7 +18,24 @@ export default function App() {
   const handleIncrement = useCallback(
     (playerId: string, delta: number) => {
       dispatch({ type: 'CLEAR_SELECTION' });
-      dispatch({ type: 'INCREMENT_LIFE', playerId, delta });
+      if (state.commanderDamageSourceId) {
+        dispatch({
+          type: 'INCREMENT_COMMANDER_DAMAGE',
+          sourcePlayerId: state.commanderDamageSourceId,
+          targetPlayerId: playerId,
+          delta,
+        });
+      } else {
+        dispatch({ type: 'INCREMENT_LIFE', playerId, delta });
+      }
+    },
+    [state.commanderDamageSourceId],
+  );
+
+  const handleToggleCommanderDamage = useCallback(
+    (sourcePlayerId: string) => {
+      dispatch({ type: 'CLEAR_SELECTION' });
+      dispatch({ type: 'TOGGLE_COMMANDER_DAMAGE_VIEW', sourcePlayerId });
     },
     [],
   );
@@ -26,6 +43,7 @@ export default function App() {
   return (
     <div className="flex flex-row h-full w-full">
       <TopBar
+        commanderDamageMode={!!state.commanderDamageSourceId}
         playerCount={state.visibleCount}
         onAddPlayer={() => {
           dispatch({ type: 'CLEAR_SELECTION' });
@@ -44,7 +62,9 @@ export default function App() {
       <PlayerGrid
         players={state.players.slice(0, state.visibleCount)}
         selectedPlayerId={state.selectedPlayerId}
+        commanderDamageSourceId={state.commanderDamageSourceId}
         onIncrement={handleIncrement}
+        onToggleCommanderDamage={handleToggleCommanderDamage}
       />
     </div>
   );

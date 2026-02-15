@@ -1,14 +1,19 @@
 import { useRef, useEffect } from 'react';
+import { Swords } from 'lucide-react';
 import { Player } from '../state/types';
 
 interface PlayerTileProps {
   player: Player;
   isSelected: boolean;
   rotation: number;
+  commanderDamageSourceId: string | null;
   onIncrement: (delta: number) => void;
+  onToggleCommanderDamage: () => void;
 }
 
-export default function PlayerTile({ player, isSelected, rotation, onIncrement }: PlayerTileProps) {
+const holdTimeout = 750;
+
+export default function PlayerTile({ player, isSelected, rotation, commanderDamageSourceId, onIncrement, onToggleCommanderDamage }: PlayerTileProps) {
   const topTimerRef = useRef<number | null>(null);
   const bottomTimerRef = useRef<number | null>(null);
   const topIntervalRef = useRef<number | null>(null);
@@ -36,9 +41,9 @@ export default function PlayerTile({ player, isSelected, rotation, onIncrement }
       onIncrement(topDelta * 5);
       topIntervalRef.current = setInterval(() => {
         onIncrement(topDelta * 5);
-      }, 1000);
+      }, holdTimeout);
       topTimerRef.current = null; // Clear timeout ref
-    }, 1000);
+    }, holdTimeout);
   };
 
   const handleBottomStart = () => {
@@ -48,9 +53,9 @@ export default function PlayerTile({ player, isSelected, rotation, onIncrement }
       onIncrement(bottomDelta * 5);
       bottomIntervalRef.current = setInterval(() => {
         onIncrement(bottomDelta * 5);
-      }, 1000);
+      }, holdTimeout);
       bottomTimerRef.current = null; // Clear timeout ref
-    }, 1000);
+    }, holdTimeout);
   };
 
   const handleTopEnd = () => {
@@ -97,10 +102,17 @@ export default function PlayerTile({ player, isSelected, rotation, onIncrement }
         }}
       >
         <span className="pointer-events-none text-white/40 text-xl font-bold">+</span>
-        <span className="text-7xl sm:text-8xl md:text-9xl font-bold text-white drop-shadow-lg tabular-nums leading-none py-2">
-          {player.life}
-        </span>
+        {commanderDamageSourceId && commanderDamageSourceId !== player.id ? (
+          <span className="text-7xl sm:text-8xl md:text-9xl font-bold text-white drop-shadow-lg tabular-nums leading-none py-2">
+            {player.commanderDamage[commanderDamageSourceId] ?? 0}
+          </span>
+        ) : (
+          <span className="text-7xl sm:text-8xl md:text-9xl font-bold text-white drop-shadow-lg tabular-nums leading-none py-2">
+            {player.life}
+          </span>
+        )}
         <span className="pointer-events-none text-white/40 text-xl font-bold">−</span>
+
       </div>
 
       {/* Selection highlight — persistent ring + 3x pulse */}
@@ -117,11 +129,15 @@ export default function PlayerTile({ player, isSelected, rotation, onIncrement }
         </>
       )}
 
-      {/* Divider line — rotated with content */}
-      <div
-        className="absolute pointer-events-none w-full border-t border-white/10"
-        style={{ top: '50%' }}
-      />
+      {/* Commander damage lowlight */}
+      {(commanderDamageSourceId && commanderDamageSourceId == player.id) && (
+        <>
+          <div
+            className="absolute inset-0 rounded-2xl bg-black/30 pointer-events-none z-20"
+          />
+        </>
+      )}
+
 
       {/* Tap zones — NOT rotated, use computed deltas */}
       <div
@@ -142,6 +158,34 @@ export default function PlayerTile({ player, isSelected, rotation, onIncrement }
         onTouchEnd={handleBottomEnd}
         aria-label={bottomDelta > 0 ? 'Increase life' : 'Decrease life'}
       />
+
+      <div
+        className="absolute flex flex-col items-center justify-center w-full h-full pointer-events-none z-30"
+        style={{
+          transform: `rotate(${rotation}deg)`,
+          transformOrigin: 'center center',
+        }}
+      >
+        {/* Commander damage toggle button */}
+        <button
+          className={`absolute middle-2 right-4 p-4 rounded-2xl transition-colors pointer-events-auto cursor-pointer ${commanderDamageSourceId === player.id
+            ? 'bg-white/30 text-white'
+            : commanderDamageSourceId
+              ? 'bg-white/5 text-white/20 cursor-not-allowed'
+              : 'bg-white/20 text-white hover:bg-white/50 hover:text-white/70'
+            }`}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (!commanderDamageSourceId || commanderDamageSourceId === player.id) {
+              onToggleCommanderDamage();
+            }
+          }}
+          disabled={!!commanderDamageSourceId && commanderDamageSourceId !== player.id}
+          aria-label="Toggle commander damage"
+        >
+          <Swords size={32} />
+        </button>
+      </div>
     </div>
   );
 }

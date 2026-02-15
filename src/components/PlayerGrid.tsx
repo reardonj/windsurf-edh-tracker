@@ -4,7 +4,9 @@ import PlayerTile from './PlayerTile';
 interface PlayerGridProps {
   players: Player[];
   selectedPlayerId: string | null;
+  commanderDamageSourceId: string | null;
   onIncrement: (playerId: string, delta: number) => void;
+  onToggleCommanderDamage: (sourcePlayerId: string) => void;
 }
 
 /**
@@ -63,7 +65,7 @@ function getTileSpanClass(index: number, total: number): string {
   return '';
 }
 
-export default function PlayerGrid({ players, selectedPlayerId, onIncrement }: PlayerGridProps) {
+export default function PlayerGrid({ players, selectedPlayerId, commanderDamageSourceId, onIncrement, onToggleCommanderDamage }: PlayerGridProps) {
   return (
     <div className={`grid gap-1.5 p-1.5 flex-1 min-h-0 ${getGridClass(players.length)}`}>
       {players.map((player, i) => (
@@ -72,7 +74,9 @@ export default function PlayerGrid({ players, selectedPlayerId, onIncrement }: P
             player={player}
             isSelected={player.id === selectedPlayerId}
             rotation={getRotation(i, players.length)}
+            commanderDamageSourceId={commanderDamageSourceId}
             onIncrement={(delta) => onIncrement(player.id, delta)}
+            onToggleCommanderDamage={() => onToggleCommanderDamage(player.id)}
           />
         </div>
       ))}

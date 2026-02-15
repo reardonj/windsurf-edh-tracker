@@ -8,13 +8,17 @@ export type GameAction =
   | { type: 'SET_SELECTED'; playerId: string | null }
   | { type: 'CLEAR_SELECTION' }
   | { type: 'RESET_GAME' }
-  | { type: 'HYDRATE'; state: GameState };
+  | { type: 'HYDRATE'; state: GameState }
+  | { type: 'TOGGLE_COMMANDER_DAMAGE_VIEW'; sourcePlayerId: string }
+  | { type: 'INCREMENT_COMMANDER_DAMAGE'; sourcePlayerId: string; targetPlayerId: string; delta: number }
+  | { type: 'RESET_COMMANDER_DAMAGE' };
 
 function makePlayer(index: number): Player {
   return {
     id: `p${index}`,
     life: STARTING_LIFE,
     colorIndex: index % PLAYER_COLOR_COUNT,
+    commanderDamage: {},
   };
 }
 
@@ -28,6 +32,7 @@ export function createInitialState(visibleCount: number = 4): GameState {
     players,
     visibleCount,
     selectedPlayerId: null,
+    commanderDamageSourceId: null,
   };
 }
 
@@ -82,13 +87,45 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     case 'RESET_GAME': {
       return {
         ...state,
-        players: state.players.map((p) => ({ ...p, life: STARTING_LIFE })),
+        players: state.players.map((p) => ({ ...p, life: STARTING_LIFE, commanderDamage: {} })),
         selectedPlayerId: null,
+        commanderDamageSourceId: null,
       };
     }
 
     case 'HYDRATE': {
       return action.state;
+    }
+
+    case 'TOGGLE_COMMANDER_DAMAGE_VIEW': {
+      const isActive = state.commanderDamageSourceId === action.sourcePlayerId;
+      return {
+        ...state,
+        commanderDamageSourceId: isActive ? null : action.sourcePlayerId,
+      };
+    }
+
+    case 'INCREMENT_COMMANDER_DAMAGE': {
+      return {
+        ...state,
+        players: state.players.map((p) => {
+          if (p.id !== action.targetPlayerId) return p;
+          const current = p.commanderDamage[action.sourcePlayerId] ?? 0;
+          const next = Math.max(0, current + action.delta);
+          return {
+            ...p,
+            commanderDamage: { ...p.commanderDamage, [action.sourcePlayerId]: next },
+          };
+        }),
+      };
+    }
+
+    case 'RESET_COMMANDER_DAMAGE': {
+      return {
+        ...state,
+        players: state.players.map((p) => ({ ...p, commanderDamage: {} })),
+        commanderDamageSourceId: null,
+      };
     }
 
     default:

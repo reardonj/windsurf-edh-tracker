@@ -21,6 +21,14 @@ export function loadState(): GameState | null {
       Array.isArray(parsed.players) &&
       parsed.players.length >= 2
     ) {
+      // Migrate: ensure commanderDamage exists on each player
+      for (const p of parsed.players) {
+        if (!p.commanderDamage) p.commanderDamage = {};
+      }
+      // Migrate: ensure commanderDamageSourceId exists
+      if (parsed.commanderDamageSourceId === undefined) {
+        parsed.commanderDamageSourceId = null;
+      }
       return parsed as GameState;
     }
     return null;

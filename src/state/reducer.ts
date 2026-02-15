@@ -1,4 +1,4 @@
-import { GameState, Player, STARTING_LIFE, MIN_PLAYERS, MAX_PLAYERS, PLAYER_COLORS } from './types';
+import { GameState, Player, STARTING_LIFE, MIN_PLAYERS, MAX_PLAYERS, PLAYER_COLOR_COUNT } from './types';
 
 export type GameAction =
   | { type: 'INCREMENT_LIFE'; playerId: string; delta: number }
@@ -14,7 +14,7 @@ function makePlayer(index: number): Player {
   return {
     id: `p${index}`,
     life: STARTING_LIFE,
-    color: PLAYER_COLORS[index % PLAYER_COLORS.length],
+    colorIndex: index % PLAYER_COLOR_COUNT,
   };
 }
 

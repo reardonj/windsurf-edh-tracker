@@ -86,7 +86,7 @@ export default function PlayerTile({ player, isSelected, rotation, onIncrement }
   return (
     <div
       className="relative flex items-center justify-center rounded-2xl select-none overflow-hidden h-full"
-      style={{ backgroundColor: player.color }}
+      style={{ backgroundColor: `var(--player-color-${player.colorIndex})` }}
     >
       {/* Rotated content wrapper */}
       <div

@@ -1,6 +1,6 @@
 import { GameState } from './types';
 
-const STORAGE_KEY = 'edh-tracker-state';
+const STORAGE_KEY = 'edh-tracker-state-v2';
 
 export function saveState(state: GameState): void {
   try {
@@ -21,10 +21,6 @@ export function loadState(): GameState | null {
       Array.isArray(parsed.players) &&
       parsed.players.length >= 2
     ) {
-      // Migrate old state that lacks visibleCount
-      if (typeof parsed.visibleCount !== 'number') {
-        parsed.visibleCount = parsed.players.length;
-      }
       return parsed as GameState;
     }
     return null;

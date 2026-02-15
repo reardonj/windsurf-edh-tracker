@@ -1,1 +1,15 @@
-{"root":["./src/app.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/components/playergrid.tsx","./src/components/playertile.tsx","./src/components/topbar.tsx","./src/state/reducer.ts","./src/state/storage.ts","./src/state/types.ts"],"version":"5.9.3"}
+{
+  "root": [
+    "./src/app.tsx",
+    "./src/main.tsx",
+    "./src/vite-env.d.ts",
+    "./src/components/counterbutton.tsx",
+    "./src/components/playergrid.tsx",
+    "./src/components/playertile.tsx",
+    "./src/components/topbar.tsx",
+    "./src/state/reducer.ts",
+    "./src/state/storage.ts",
+    "./src/state/types.ts"
+  ],
+  "version": "5.9.3"
+}

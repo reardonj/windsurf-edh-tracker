@@ -1,5 +1,5 @@
 import { useRef, useEffect } from 'react';
-import { Swords, Droplet, Radio, Zap, Crown, Radiation } from 'lucide-react';
+import { Swords, Droplet, Zap, Crown, Radiation } from 'lucide-react';
 import { Player, CounterType } from '../state/types';
 import CounterButton from './CounterButton';
 

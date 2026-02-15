@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
+:root {
+  --player-color-0: #e74c3c;
+  --player-color-1: #1abc9c;
+  --player-color-2: #3498db;
+  --player-color-5: #2ecc71;
+  --player-color-4: #f39c12;
+  --player-color-3: #9b59b6;
+}
+
 @keyframes pulse-3x {
   0%, 100% { opacity: 0; }
   50% { opacity: 1; }

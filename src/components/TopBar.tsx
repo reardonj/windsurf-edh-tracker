@@ -8,7 +8,7 @@ interface TopBarProps {
   onRemovePlayer: () => void;
   onRandomPlayer: () => void;
   onReset: () => void;
-  commanderDamageMode: boolean;
+  modalIncrementInProgress: boolean;
 }
 
 export default function TopBar({
@@ -17,7 +17,7 @@ export default function TopBar({
   onRemovePlayer,
   onRandomPlayer,
   onReset,
-  commanderDamageMode,
+  modalIncrementInProgress: commanderDamageMode,
 }: TopBarProps) {
   const [showConfirm, setShowConfirm] = useState(false);
 

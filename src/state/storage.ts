@@ -29,6 +29,25 @@ export function loadState(): GameState | null {
       if (parsed.commanderDamageSourceId === undefined) {
         parsed.commanderDamageSourceId = null;
       }
+      // Migrate: ensure counters exist on each player
+      for (const p of parsed.players) {
+        if (!p.counters) {
+          p.counters = {
+            poison: 0,
+            radiation: 0,
+            energy: 0,
+            commander_casts: 0,
+          };
+        }
+      }
+      // Migrate: ensure activeCounterType exists
+      if (parsed.activeCounterType === undefined) {
+        parsed.activeCounterType = null;
+      }
+      // Migrate: ensure activeCounterPlayerId exists
+      if (parsed.activeCounterPlayerId === undefined) {
+        parsed.activeCounterPlayerId = null;
+      }
       return parsed as GameState;
     }
     return null;

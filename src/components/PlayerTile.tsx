@@ -1,19 +1,23 @@
 import { useRef, useEffect } from 'react';
-import { Swords } from 'lucide-react';
-import { Player } from '../state/types';
+import { Swords, Droplet, Radio, Zap, Crown, Radiation } from 'lucide-react';
+import { Player, CounterType } from '../state/types';
+import CounterButton from './CounterButton';
 
 interface PlayerTileProps {
   player: Player;
   isSelected: boolean;
   rotation: number;
   commanderDamageSourceId: string | null;
+  activeCounterType: CounterType | null;
+  activeCounterPlayerId: string | null;
   onIncrement: (delta: number) => void;
   onToggleCommanderDamage: () => void;
+  onToggleCounter: (counterType: CounterType) => void;
 }
 
 const holdTimeout = 750;
 
-export default function PlayerTile({ player, isSelected, rotation, commanderDamageSourceId, onIncrement, onToggleCommanderDamage }: PlayerTileProps) {
+export default function PlayerTile({ player, isSelected, rotation, commanderDamageSourceId, activeCounterType, activeCounterPlayerId, onIncrement, onToggleCommanderDamage, onToggleCounter }: PlayerTileProps) {
   const topTimerRef = useRef<number | null>(null);
   const bottomTimerRef = useRef<number | null>(null);
   const topIntervalRef = useRef<number | null>(null);
@@ -102,15 +106,13 @@ export default function PlayerTile({ player, isSelected, rotation, commanderDama
         }}
       >
         <span className="pointer-events-none text-white/40 text-xl font-bold">+</span>
-        {commanderDamageSourceId && commanderDamageSourceId !== player.id ? (
-          <span className="text-7xl sm:text-8xl md:text-9xl font-bold text-white drop-shadow-lg tabular-nums leading-none py-2">
-            {player.commanderDamage[commanderDamageSourceId] ?? 0}
-          </span>
-        ) : (
-          <span className="text-7xl sm:text-8xl md:text-9xl font-bold text-white drop-shadow-lg tabular-nums leading-none py-2">
-            {player.life}
-          </span>
-        )}
+        <span className="text-7xl sm:text-8xl md:text-9xl font-bold text-white drop-shadow-lg tabular-nums leading-none py-2">
+          {commanderDamageSourceId && commanderDamageSourceId !== player.id ? (
+            player.commanderDamage[commanderDamageSourceId] ?? 0
+          ) : (activeCounterType && activeCounterPlayerId === player.id) ? (
+            player.counters[activeCounterType] ?? 0
+          ) : (player.life)}
+        </span>
         <span className="pointer-events-none text-white/40 text-xl font-bold">−</span>
 
       </div>
@@ -131,6 +133,15 @@ export default function PlayerTile({ player, isSelected, rotation, commanderDama
 
       {/* Commander damage lowlight */}
       {(commanderDamageSourceId && commanderDamageSourceId == player.id) && (
+        <>
+          <div
+            className="absolute inset-0 rounded-2xl bg-black/30 pointer-events-none z-20"
+          />
+        </>
+      )}
+
+      {/* Counter lowlight for other players */}
+      {activeCounterPlayerId && activeCounterPlayerId !== player.id && (
         <>
           <div
             className="absolute inset-0 rounded-2xl bg-black/30 pointer-events-none z-20"
@@ -166,21 +177,67 @@ export default function PlayerTile({ player, isSelected, rotation, commanderDama
           transformOrigin: 'center center',
         }}
       >
-        {/* Commander damage toggle button */}
+        {/* Counter buttons - left side */}
+        <div className="absolute left-4 flex flex-col gap-2">
+          <CounterButton
+            counterType="commander_casts"
+            icon={Crown}
+            count={player.counters.commander_casts}
+            playerId={player.id}
+            activeCounterType={activeCounterType}
+            activeCounterPlayerId={activeCounterPlayerId}
+            commanderDamageSourceId={commanderDamageSourceId}
+            onToggle={onToggleCounter}
+          />
+          <CounterButton
+            counterType="energy"
+            icon={Zap}
+            count={player.counters.energy}
+            playerId={player.id}
+            activeCounterType={activeCounterType}
+            activeCounterPlayerId={activeCounterPlayerId}
+            commanderDamageSourceId={commanderDamageSourceId}
+            onToggle={onToggleCounter}
+          />
+          <CounterButton
+            counterType="poison"
+            icon={Droplet}
+            count={player.counters.poison}
+            playerId={player.id}
+            activeCounterType={activeCounterType}
+            activeCounterPlayerId={activeCounterPlayerId}
+            commanderDamageSourceId={commanderDamageSourceId}
+            onToggle={onToggleCounter}
+          />
+          <CounterButton
+            counterType="radiation"
+            icon={Radiation}
+            count={player.counters.radiation}
+            playerId={player.id}
+            activeCounterType={activeCounterType}
+            activeCounterPlayerId={activeCounterPlayerId}
+            commanderDamageSourceId={commanderDamageSourceId}
+            onToggle={onToggleCounter}
+          />
+        </div>
+
+        {/* Commander damage toggle button - right side */}
         <button
           className={`absolute middle-2 right-4 p-4 rounded-2xl transition-colors pointer-events-auto cursor-pointer ${commanderDamageSourceId === player.id
             ? 'bg-white/30 text-white'
-            : commanderDamageSourceId
+            : commanderDamageSourceId || activeCounterPlayerId
               ? 'bg-white/5 text-white/20 cursor-not-allowed'
               : 'bg-white/20 text-white hover:bg-white/50 hover:text-white/70'
             }`}
           onClick={(e) => {
             e.stopPropagation();
-            if (!commanderDamageSourceId || commanderDamageSourceId === player.id) {
+            if (!commanderDamageSourceId && !activeCounterPlayerId) {
+              onToggleCommanderDamage();
+            } else if (commanderDamageSourceId === player.id) {
               onToggleCommanderDamage();
             }
           }}
-          disabled={!!commanderDamageSourceId && commanderDamageSourceId !== player.id}
+          disabled={(!!commanderDamageSourceId && commanderDamageSourceId !== player.id) || !!activeCounterPlayerId}
           aria-label="Toggle commander damage"
         >
           <Swords size={32} />

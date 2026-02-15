@@ -1,17 +1,19 @@
-import { GameState, Player, STARTING_LIFE, MIN_PLAYERS, MAX_PLAYERS, PLAYER_COLOR_COUNT } from './types';
+import { GameState, Player, STARTING_LIFE, MIN_PLAYERS, MAX_PLAYERS, PLAYER_COLOR_COUNT, CounterType } from './types';
 
 export type GameAction =
   | { type: 'INCREMENT_LIFE'; playerId: string; delta: number }
   | { type: 'ADD_PLAYER' }
   | { type: 'REMOVE_PLAYER' }
   | { type: 'SELECT_RANDOM_PLAYER' }
+  | { type: 'CLEAR_RANDOM_PLAYER' }
   | { type: 'SET_SELECTED'; playerId: string | null }
   | { type: 'CLEAR_SELECTION' }
   | { type: 'RESET_GAME' }
   | { type: 'HYDRATE'; state: GameState }
   | { type: 'TOGGLE_COMMANDER_DAMAGE_VIEW'; sourcePlayerId: string }
   | { type: 'INCREMENT_COMMANDER_DAMAGE'; sourcePlayerId: string; targetPlayerId: string; delta: number }
-  | { type: 'RESET_COMMANDER_DAMAGE' };
+  | { type: 'TOGGLE_COUNTER_VIEW'; counterType: CounterType; playerId: string }
+  | { type: 'INCREMENT_COUNTER'; playerId: string; counterType: CounterType; delta: number };
 
 function makePlayer(index: number): Player {
   return {
@@ -19,6 +21,12 @@ function makePlayer(index: number): Player {
     life: STARTING_LIFE,
     colorIndex: index % PLAYER_COLOR_COUNT,
     commanderDamage: {},
+    counters: {
+      poison: 0,
+      radiation: 0,
+      energy: 0,
+      commander_casts: 0,
+    },
   };
 }
 
@@ -33,6 +41,8 @@ export function createInitialState(visibleCount: number = 4): GameState {
     visibleCount,
     selectedPlayerId: null,
     commanderDamageSourceId: null,
+    activeCounterType: null,
+    activeCounterPlayerId: null,
   };
 }
 
@@ -76,6 +86,13 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       };
     }
 
+    case 'CLEAR_RANDOM_PLAYER': {
+      return {
+        ...state,
+        selectedPlayerId: null,
+      };
+    }
+
     case 'SET_SELECTED': {
       return { ...state, selectedPlayerId: action.playerId };
     }
@@ -87,9 +104,21 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     case 'RESET_GAME': {
       return {
         ...state,
-        players: state.players.map((p) => ({ ...p, life: STARTING_LIFE, commanderDamage: {} })),
+        players: state.players.map((p) => ({
+          ...p,
+          life: STARTING_LIFE,
+          commanderDamage: {},
+          counters: {
+            poison: 0,
+            radiation: 0,
+            energy: 0,
+            commander_casts: 0,
+          },
+        })),
         selectedPlayerId: null,
         commanderDamageSourceId: null,
+        activeCounterType: null,
+        activeCounterPlayerId: null,
       };
     }
 
@@ -120,11 +149,27 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       };
     }
 
-    case 'RESET_COMMANDER_DAMAGE': {
+    case 'TOGGLE_COUNTER_VIEW': {
+      const isActive = state.activeCounterType === action.counterType && state.activeCounterPlayerId === action.playerId;
       return {
         ...state,
-        players: state.players.map((p) => ({ ...p, commanderDamage: {} })),
-        commanderDamageSourceId: null,
+        activeCounterType: isActive ? null : action.counterType,
+        activeCounterPlayerId: isActive ? null : action.playerId,
+      };
+    }
+
+    case 'INCREMENT_COUNTER': {
+      return {
+        ...state,
+        players: state.players.map((p) => {
+          if (p.id !== action.playerId) return p;
+          const current = p.counters[action.counterType];
+          const next = Math.max(0, current + action.delta);
+          return {
+            ...p,
+            counters: { ...p.counters, [action.counterType]: next },
+          };
+        }),
       };
     }
 

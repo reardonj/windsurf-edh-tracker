@@ -1,8 +1,18 @@
+export type CounterType = 'poison' | 'radiation' | 'energy' | 'commander_casts';
+
+export interface PlayerCounters {
+  poison: number;
+  radiation: number;
+  energy: number;
+  commander_casts: number;
+}
+
 export interface Player {
   id: string;
   life: number;
   colorIndex: number;
   commanderDamage: Record<string, number>;
+  counters: PlayerCounters;
 }
 
 export interface GameState {
@@ -11,6 +21,8 @@ export interface GameState {
   visibleCount: number;
   selectedPlayerId: string | null;
   commanderDamageSourceId: string | null;
+  activeCounterType: CounterType | null;
+  activeCounterPlayerId: string | null;
 }
 
 export const STARTING_LIFE = 40;

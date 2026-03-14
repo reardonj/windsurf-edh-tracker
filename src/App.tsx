@@ -27,12 +27,15 @@ export default function App() {
           delta,
         });
       } else if (state.activeCounterType) {
-        dispatch({
-          type: 'INCREMENT_COUNTER',
-          playerId,
-          counterType: state.activeCounterType,
-          delta,
-        });
+        if (playerId === state.activeCounterPlayerId) {
+          dispatch({
+            type: 'INCREMENT_COUNTER',
+            playerId,
+            counterType: state.activeCounterType,
+            delta,
+          });
+        }
+        // If counter is active but wrong player, do nothing
       } else {
         dispatch({ type: 'INCREMENT_LIFE', playerId, delta });
       }

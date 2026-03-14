@@ -153,20 +153,16 @@ export default function PlayerTile({ player, isSelected, rotation, commanderDama
       {/* Tap zones — NOT rotated, use computed deltas */}
       <div
         className="absolute top-0 left-0 w-full h-1/2 opacity-0 active:opacity-10 active:bg-white cursor-pointer z-10"
-        onMouseDown={handleTopStart}
-        onMouseUp={handleTopEnd}
-        onMouseLeave={handleTopEnd}
-        onTouchStart={handleTopStart}
-        onTouchEnd={handleTopEnd}
+        onPointerDown={handleTopStart}
+        onPointerUp={handleTopEnd}
+        onPointerLeave={handleTopEnd}
         aria-label={topDelta > 0 ? 'Increase life' : 'Decrease life'}
       />
       <div
         className="absolute bottom-0 left-0 w-full h-1/2 opacity-0 active:opacity-10 active:bg-white cursor-pointer z-10"
-        onMouseDown={handleBottomStart}
-        onMouseUp={handleBottomEnd}
-        onMouseLeave={handleBottomEnd}
-        onTouchStart={handleBottomStart}
-        onTouchEnd={handleBottomEnd}
+        onPointerDown={handleBottomStart}
+        onPointerUp={handleBottomEnd}
+        onPointerLeave={handleBottomEnd}
         aria-label={bottomDelta > 0 ? 'Increase life' : 'Decrease life'}
       />
 

@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState, useCallback } from 'react';
 import { Swords, Droplet, Zap, Crown, Radiation } from 'lucide-react';
 import { Player, CounterType } from '../state/types';
 import CounterButton from './CounterButton';
@@ -16,12 +16,23 @@ interface PlayerTileProps {
 }
 
 const holdTimeout = 750;
+const changeIndicatorTimeout = 5000;
+const fadeAnimationDuration = 300;
 
 export default function PlayerTile({ player, isSelected, rotation, commanderDamageSourceId, activeCounterType, activeCounterPlayerId, onIncrement, onToggleCommanderDamage, onToggleCounter }: PlayerTileProps) {
   const topTimerRef = useRef<number | null>(null);
   const bottomTimerRef = useRef<number | null>(null);
   const topIntervalRef = useRef<number | null>(null);
   const bottomIntervalRef = useRef<number | null>(null);
+  
+  // Change indicator state
+  const [accumulatedChange, setAccumulatedChange] = useState(0);
+  const [previousValue, setPreviousValue] = useState<number | null>(null);
+  const [displayChange, setDisplayChange] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
+  const changeTimeoutRef = useRef<number | null>(null);
+  const fadeTimeoutRef = useRef<number | null>(null);
+  const currentModeRef = useRef<string>('life');
 
   // For 180° tiles the screen top/bottom are flipped relative to the user's view
   const isFlipped = rotation === 180;
@@ -35,8 +46,94 @@ export default function PlayerTile({ player, isSelected, rotation, commanderDama
       if (bottomTimerRef.current) clearTimeout(bottomTimerRef.current);
       if (topIntervalRef.current) clearInterval(topIntervalRef.current);
       if (bottomIntervalRef.current) clearInterval(bottomIntervalRef.current);
+      if (changeTimeoutRef.current) clearTimeout(changeTimeoutRef.current);
+      if (fadeTimeoutRef.current) clearTimeout(fadeTimeoutRef.current);
     };
   }, []);
+
+  // Get current display value and mode
+  const getCurrentValueAndMode = useCallback(() => {
+    if (commanderDamageSourceId && commanderDamageSourceId !== player.id) {
+      return {
+        value: player.commanderDamage[commanderDamageSourceId] ?? 0,
+        mode: `commander-${commanderDamageSourceId}`
+      };
+    }
+    if (activeCounterType && activeCounterPlayerId === player.id) {
+      return {
+        value: player.counters[activeCounterType] ?? 0,
+        mode: `counter-${activeCounterType}`
+      };
+    }
+    return {
+      value: player.life,
+      mode: 'life'
+    };
+  }, [player, commanderDamageSourceId, activeCounterType, activeCounterPlayerId]);
+
+  // Start fade out animation
+  const startFadeOut = useCallback(() => {
+    // Start fade out but keep the last value visible
+    setIsVisible(false);
+    // Then completely remove after animation completes
+    fadeTimeoutRef.current = setTimeout(() => {
+      setAccumulatedChange(0);
+      setDisplayChange(0);
+      setPreviousValue(null);
+      fadeTimeoutRef.current = null;
+    }, fadeAnimationDuration);
+  }, []);
+
+  // Handle value changes
+  useEffect(() => {
+    const { value, mode } = getCurrentValueAndMode();
+    
+    // Check if mode changed
+    if (currentModeRef.current !== mode) {
+      currentModeRef.current = mode;
+      // Clear all timers
+      if (changeTimeoutRef.current) {
+        clearTimeout(changeTimeoutRef.current);
+        changeTimeoutRef.current = null;
+      }
+      if (fadeTimeoutRef.current) {
+        clearTimeout(fadeTimeoutRef.current);
+        fadeTimeoutRef.current = null;
+      }
+      // Reset states
+      setAccumulatedChange(0);
+      setDisplayChange(0);
+      setIsVisible(false);
+      setPreviousValue(value);
+      return;
+    }
+
+    // Check if value changed
+    if (previousValue !== null && previousValue !== value) {
+      const delta = value - previousValue;
+      // If displayChange is 0 (meaning we faded out), reset accumulatedChange before adding new delta
+      const newAccumulatedChange = displayChange === 0 ? delta : accumulatedChange + delta;
+      setAccumulatedChange(newAccumulatedChange);
+      setDisplayChange(newAccumulatedChange);
+      setIsVisible(true);
+      setPreviousValue(value);
+
+      // Reset timer
+      if (changeTimeoutRef.current) {
+        clearTimeout(changeTimeoutRef.current);
+      }
+      if (fadeTimeoutRef.current) {
+        clearTimeout(fadeTimeoutRef.current);
+      }
+      changeTimeoutRef.current = setTimeout(() => {
+        startFadeOut();
+        changeTimeoutRef.current = null;
+      }, changeIndicatorTimeout);
+    } else if (previousValue === null) {
+      // First time setting value
+      setPreviousValue(value);
+    }
+  }, [getCurrentValueAndMode, previousValue, accumulatedChange, startFadeOut]);
 
   const handleTopStart = () => {
     // Start 1s delay timer
@@ -106,13 +203,31 @@ export default function PlayerTile({ player, isSelected, rotation, commanderDama
         }}
       >
         <span className="pointer-events-none text-white/40 text-xl font-bold">+</span>
-        <span className="text-7xl sm:text-8xl md:text-9xl font-bold text-white drop-shadow-lg tabular-nums leading-none py-2">
-          {commanderDamageSourceId && commanderDamageSourceId !== player.id ? (
-            player.commanderDamage[commanderDamageSourceId] ?? 0
-          ) : (activeCounterType && activeCounterPlayerId === player.id) ? (
-            player.counters[activeCounterType] ?? 0
-          ) : (player.life)}
-        </span>
+        <div className="relative flex items-center justify-center">
+          <span className="text-7xl sm:text-8xl md:text-9xl font-bold text-white drop-shadow-lg tabular-nums leading-none py-2">
+            {commanderDamageSourceId && commanderDamageSourceId !== player.id ? (
+              player.commanderDamage[commanderDamageSourceId] ?? 0
+            ) : (activeCounterType && activeCounterPlayerId === player.id) ? (
+              player.counters[activeCounterType] ?? 0
+            ) : (player.life)}
+          </span>
+          <span className="absolute left-full ml-2 text-2xl sm:text-3xl md:text-4xl font-bold tabular-nums leading-none py-2 min-w-[3ch] text-center">
+            <span 
+              className={`${
+                displayChange > 0 ? 'text-green-300' : displayChange < 0 ? 'text-red-300' : ''
+              } transition-opacity ease-in-out ${
+                isVisible ? 'opacity-100' : 'opacity-0'
+              }`}
+              style={{ transitionDuration: `${fadeAnimationDuration}ms` }}
+            >
+              {displayChange !== 0 ? (
+                <>{displayChange > 0 ? '+' : ''}{displayChange}</>
+              ) : (
+                '+0'
+              )}
+            </span>
+          </span>
+        </div>
         <span className="pointer-events-none text-white/40 text-xl font-bold">−</span>
 
       </div>

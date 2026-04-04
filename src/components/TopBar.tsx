@@ -61,6 +61,16 @@ export default function TopBar({
           <span className="-rotate-90"><UserMinus size={22} /></span>
         </button>
         <button
+          className={`${smallBtnClass} bg-gray-700 hover:bg-gray-600 text-white`}
+          onClick={onToggleFullscreen}
+          disabled={commanderDamageMode}
+          aria-label="Toggle fullscreen"
+        >
+          <span className="-rotate-90">
+            {isFullscreen ? <Minimize size={22} /> : <Fullscreen size={22} />}
+          </span>
+        </button>
+        <button
           className={`${btnClass} bg-sky-600 hover:bg-sky-500 text-white`}
           onClick={onRandomPlayer}
           disabled={commanderDamageMode}
@@ -75,16 +85,6 @@ export default function TopBar({
           aria-label="Reset game"
         >
           <span className="-rotate-90"><RotateCcw size={22} /></span>
-        </button>
-        <button
-          className={`${smallBtnClass} bg-gray-700 hover:bg-gray-600 text-white`}
-          onClick={onToggleFullscreen}
-          disabled={commanderDamageMode}
-          aria-label="Toggle fullscreen"
-        >
-          <span className="-rotate-90">
-            {isFullscreen ? <Minimize size={22} /> : <Fullscreen size={22} />}
-          </span>
         </button>
       </div>
 

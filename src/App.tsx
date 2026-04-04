@@ -59,6 +59,18 @@ export default function App() {
     [],
   );
 
+  const handleToggleFullscreen = useCallback(() => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(err => {
+        console.error('Error attempting to enable fullscreen:', err);
+      });
+    } else {
+      document.exitFullscreen().catch(err => {
+        console.error('Error attempting to exit fullscreen:', err);
+      });
+    }
+  }, []);
+
   return (
     <div className="flex flex-row h-full w-full">
       <TopBar
@@ -83,6 +95,7 @@ export default function App() {
           dispatch({ type: 'CLEAR_SELECTION' });
           dispatch({ type: 'RESET_GAME' })
         }}
+        onToggleFullscreen={handleToggleFullscreen}
       />
       <PlayerGrid
         players={state.players.slice(0, state.visibleCount)}

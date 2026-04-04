@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { UserPlus, UserMinus, Dices, RotateCcw } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { UserPlus, UserMinus, Dices, RotateCcw, Fullscreen, Minimize } from 'lucide-react';
 import { MAX_PLAYERS, MIN_PLAYERS } from '../state/types';
 
 interface TopBarProps {
@@ -8,6 +8,7 @@ interface TopBarProps {
   onRemovePlayer: () => void;
   onRandomPlayer: () => void;
   onReset: () => void;
+  onToggleFullscreen: () => void;
   modalIncrementInProgress: boolean;
 }
 
@@ -17,16 +18,32 @@ export default function TopBar({
   onRemovePlayer,
   onRandomPlayer,
   onReset,
+  onToggleFullscreen,
   modalIncrementInProgress: commanderDamageMode,
 }: TopBarProps) {
   const [showConfirm, setShowConfirm] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
 
   const btnClass =
     'w-full flex-1 flex items-center justify-center rounded-lg text-2xl transition-colors disabled:opacity-30';
 
+  const smallBtnClass =
+    'w-full shrink-1 min-h-11 flex items-center justify-center rounded-lg text-2xl transition-colors disabled:opacity-30';
+
   return (
     <>
-      <div className="flex flex-col items-stretch gap-1.5 p-1.5 pe-0 shrink-0 w-10">
+      <div className="flex flex-col items-stretch gap-1.5 p-1.5 pe-0 shrink-0 w-11">
         <button
           className={`${btnClass} bg-gray-700 hover:bg-gray-600 text-white`}
           onClick={onAddPlayer}
@@ -58,6 +75,16 @@ export default function TopBar({
           aria-label="Reset game"
         >
           <span className="-rotate-90"><RotateCcw size={22} /></span>
+        </button>
+        <button
+          className={`${smallBtnClass} bg-gray-700 hover:bg-gray-600 text-white`}
+          onClick={onToggleFullscreen}
+          disabled={commanderDamageMode}
+          aria-label="Toggle fullscreen"
+        >
+          <span className="-rotate-90">
+            {isFullscreen ? <Minimize size={22} /> : <Fullscreen size={22} />}
+          </span>
         </button>
       </div>
 

@@ -156,6 +156,7 @@ export default function PlayerTile({ player, isSelected, rotation, commanderDama
         onPointerDown={handleTopStart}
         onPointerUp={handleTopEnd}
         onPointerLeave={handleTopEnd}
+        onContextMenu={(e) => e.preventDefault()}
         aria-label={topDelta > 0 ? 'Increase life' : 'Decrease life'}
       />
       <div
@@ -163,6 +164,7 @@ export default function PlayerTile({ player, isSelected, rotation, commanderDama
         onPointerDown={handleBottomStart}
         onPointerUp={handleBottomEnd}
         onPointerLeave={handleBottomEnd}
+        onContextMenu={(e) => e.preventDefault()}
         aria-label={bottomDelta > 0 ? 'Increase life' : 'Decrease life'}
       />
 
